@@ -11,17 +11,25 @@ class LucinParser {
 
     fun parseSourceFile(text: String, name: String): LuFile {
         val file = LuFile(text, name)
-        val lexer = LucinLexer(file)
-
-        var m: LuMatter = lexer.takeNextMatter()
-        while (m.kind != LuMatterKind.mEOT) { // kotlin has no the repeat...until loop
-
-            m = lexer.takeNextMatter()
-        }
-
-
-
+        collectAndApplyRawContent(file)
         return file
     }
+
+    private fun collectAndApplyRawContent(file: LuFile) {
+        val lexer = LucinLexer(file)
+        val rawContent: Sequence<LuMatter> =
+            collectRawContent(lexer)
+        file.assignRawContent(rawContent)
+    }
+
+
+    private fun collectRawContent(lexer: LucinLexer): Sequence<LuMatter> =
+        sequence {
+            var m: LuMatter = lexer.takeNextMatter()
+            while (m.kind != LuMatterKind.mEOT) {
+                yield(m)
+                m = lexer.takeNextMatter()
+            }
+        }
 
 }
